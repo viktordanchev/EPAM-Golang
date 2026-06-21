@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+enum IssueStatus {
+  STATUS_UNSPECIFIED = 0;
+  NEW = 1;
+  ASSIGNED = 2;
+  IN_PROGRESS = 3;
+  RESOLVED = 4;
+  CLOSED = 5;
+  REOPENED = 6;
+}
+
+enum IssueResolution {
+  RESOLUTION_UNSPECIFIED = 0;
+  FIXED = 1;
+  INVALID = 2;
+  WONTFIX = 3;
+  WORKSFORME = 4;
+}
+
+enum IssueType {
+  TYPE_UNSPECIFIED = 0;
+  COSMETIC = 1;
+  BUG = 2;
+  FEATURE = 3;
+  PERFORMANCE = 4;
+}
+
+enum IssuePriority {
+  PRIORITY_UNSPECIFIED = 0;
+  CRITICAL = 1;
+  MAJOR = 2;
+  IMPORTANT = 3;
+  MINOR = 4;
+}
+
+message Issue {
+  string issue_id = 1;
+  google.protobuf.Timestamp create_date = 2;
+  google.protobuf.Timestamp modify_date = 3;
+
+  string summary = 4;
+  string description = 5;
+
+  IssueStatus status = 6;
+  IssueResolution resolution = 7;
+  IssueType type = 8;
+  IssuePriority priority = 9;
+
+  string project_id = 10;
+  string assignee_user_id = 11;
+}
+
+service IssueService {
+  rpc CreateIssue(Issue) returns (Issue);
+  rpc GetIssue(GetIssueRequest) returns (Issue);
+  rpc UpdateIssue(Issue) returns (Issue);
+  rpc DeleteIssue(DeleteIssueRequest) returns (Empty);
+  rpc ListIssues(Empty) returns (IssueList);
+}

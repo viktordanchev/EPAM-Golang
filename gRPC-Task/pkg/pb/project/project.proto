@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message Project{
+    string project_id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+service ProjectService {
+  rpc CreateProject(Project) returns (Project);
+  rpc GetProject(GetProjectRequest) returns (Project);
+  rpc UpdateProject(Project) returns (Project);
+  rpc DeleteProject(DeleteProjectRequest) returns (Empty);
+  rpc ListProjects(Empty) returns (ProjectList);
+}
