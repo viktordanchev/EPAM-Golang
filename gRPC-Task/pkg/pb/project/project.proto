@@ -1,15 +1,33 @@
 syntax = "proto3";
 
-message Project{
-    string project_id = 1;
-    string name = 2;
-    string description = 3;
+package pb;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "gen/pb/project;project";
+
+message Project {
+  string project_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message GetProjectRequest {
+  string project_id = 1;
+}
+
+message DeleteProjectRequest {
+  string project_id = 1;
+}
+
+message ProjectList {
+  repeated Project projects = 1;
 }
 
 service ProjectService {
   rpc CreateProject(Project) returns (Project);
   rpc GetProject(GetProjectRequest) returns (Project);
   rpc UpdateProject(Project) returns (Project);
-  rpc DeleteProject(DeleteProjectRequest) returns (Empty);
-  rpc ListProjects(Empty) returns (ProjectList);
+  rpc DeleteProject(DeleteProjectRequest) returns (google.protobuf.Empty);
+  rpc ListProjects(google.protobuf.Empty) returns (ProjectList);
 }
