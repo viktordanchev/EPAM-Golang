@@ -3,7 +3,10 @@ package services
 import (
 	"context"
 	pb "server/gen/pb/user"
+	"server/utils"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -12,14 +15,26 @@ type UserService struct {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, error) {
+	if req.FirstName == "" || req.LastName == "" || req.EmailAddress == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing fields")
+	}
+
 	user := &pb.User{
-		UserId:       "generated-id",
+		UserId:       utils.GenerateId(),
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
 		EmailAddress: req.EmailAddress,
 	}
 
 	return user, nil
+}
+
+func (s *UserService) UpdateUser(ctx context.Context, req *pb.User) (*pb.User, error) {
+	if req.FirstName == "" || req.LastName == "" || req.EmailAddress == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing fields")
+	}
+
+	return req, nil
 }
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
