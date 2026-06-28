@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	pb "server/gen/pb/user"
+	"server/infrastructure/memory/models"
+	"server/infrastructure/memory/repositories"
 	"server/utils"
 
 	"google.golang.org/grpc/codes"
@@ -12,6 +14,7 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
+	repo *repositories.UserRepository
 }
 
 func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, error) {
@@ -19,11 +22,20 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, e
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
 	}
 
-	user := &pb.User{
+	userModel := models.User{
 		UserId:       utils.GenerateId(),
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
 		EmailAddress: req.EmailAddress,
+	}
+
+	s.repo.CreateUser(userModel)
+
+	user := &pb.User{
+		UserId:       userModel.UserId,
+		FirstName:    userModel.FirstName,
+		LastName:     userModel.LastName,
+		EmailAddress: userModel.EmailAddress,
 	}
 
 	return user, nil
@@ -32,6 +44,18 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, e
 func (s *UserService) UpdateUser(ctx context.Context, req *pb.User) (*pb.User, error) {
 	if req.FirstName == "" || req.LastName == "" || req.EmailAddress == "" {
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
+	}
+
+	userModel := models.User{
+		UserId:       req.UserId,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
+		EmailAddress: req.EmailAddress,
+	}
+
+	err := s.repo.UpdateUser(userModel)
+	if err != nil {
+		return nil, err
 	}
 
 	return req, nil
