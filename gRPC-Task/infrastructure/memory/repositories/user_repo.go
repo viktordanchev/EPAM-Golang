@@ -36,7 +36,7 @@ func (r *UserRepository) UpdateUser(u models.User) error {
 
 	existing, err := txn.First("user", "id", u.UserId)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if existing == nil {
@@ -44,7 +44,7 @@ func (r *UserRepository) UpdateUser(u models.User) error {
 	}
 
 	if err := txn.Insert("user", u); err != nil {
-		panic(err)
+		return err
 	}
 
 	txn.Commit()

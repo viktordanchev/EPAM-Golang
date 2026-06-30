@@ -32,4 +32,5 @@ func main() {
 	calls.MakeUserCalls(ctx, userClient)
 	fmt.Println()
 	calls.MakeProjectCalls(ctx, projectClient)
+	fmt.Println()
 }

@@ -34,9 +34,9 @@ func (r *ProjectRepository) UpdateProject(p models.Project) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
-	existing, err := txn.First("user", "id", p.ProjectId)
+	existing, err := txn.First("project", "id", p.ProjectId)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if existing == nil {
@@ -44,7 +44,7 @@ func (r *ProjectRepository) UpdateProject(p models.Project) error {
 	}
 
 	if err := txn.Insert("project", p); err != nil {
-		panic(err)
+		return err
 	}
 
 	txn.Commit()
@@ -70,19 +70,23 @@ func (r *ProjectRepository) GetProject(projectID string) (models.Project, error)
 }
 
 func (r *ProjectRepository) DeleteProject(projectID string) error {
-	txn := r.store.Txn(false)
+	txn := r.store.Txn(true)
 	defer txn.Abort()
 
 	project, err := txn.First("project", "id", projectID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if project == nil {
 		return fmt.Errorf("Project not found")
 	}
 
-	txn.Delete("project", project)
+	if err := txn.Delete("project", project); err != nil {
+		return err
+	}
+
+	txn.Commit()
 	return nil
 }
 
