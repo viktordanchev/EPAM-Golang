@@ -86,7 +86,7 @@ func (r *ProjectRepository) DeleteProject(projectID string) error {
 	return nil
 }
 
-func (r *ProjectRepository) GetAllProjects() ([]*models.Project, error) {
+func (r *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 	txn := r.store.Txn(false)
 	defer txn.Abort()
 
@@ -95,10 +95,10 @@ func (r *ProjectRepository) GetAllProjects() ([]*models.Project, error) {
 		panic(err)
 	}
 
-	var projects []*models.Project
+	var projects []models.Project
 
 	for obj := it.Next(); obj != nil; obj = it.Next() {
-		projects = append(projects, obj.(*models.Project))
+		projects = append(projects, obj.(models.Project))
 	}
 
 	return projects, nil
