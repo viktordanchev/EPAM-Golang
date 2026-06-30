@@ -17,6 +17,12 @@ type UserService struct {
 	repo *repositories.UserRepository
 }
 
+func NewUserService(repo *repositories.UserRepository) *UserService {
+	return &UserService{
+		repo: repo,
+	}
+}
+
 func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, error) {
 	if req.FirstName == "" || req.LastName == "" || req.EmailAddress == "" {
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
@@ -29,7 +35,10 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, e
 		EmailAddress: req.EmailAddress,
 	}
 
-	s.repo.CreateUser(userModel)
+	err := s.repo.CreateUser(userModel)
+	if err != nil {
+		return nil, err
+	}
 
 	user := &pb.User{
 		UserId:       userModel.UserId,
@@ -63,7 +72,6 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.User) (*pb.User, e
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
 	user, err := s.repo.GetUser(req.UserId)
-
 	if err != nil {
 		return nil, err
 	}

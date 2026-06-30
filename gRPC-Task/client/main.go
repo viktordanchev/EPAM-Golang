@@ -29,7 +29,7 @@ func main() {
 	userRes, err := userClient.CreateUser(ctx, &pbUser.User{
 		FirstName:    "John",
 		LastName:     "Doe",
-		EmailAddress: "john@example.com",
+		EmailAddress: "john@example2.com",
 	})
 	if err != nil {
 		log.Fatal(err)

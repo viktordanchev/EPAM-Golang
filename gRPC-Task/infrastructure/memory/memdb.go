@@ -1,8 +1,6 @@
 package memory
 
-import (
-	"github.com/hashicorp/go-memdb"
-)
+import "github.com/hashicorp/go-memdb"
 
 type MemoryStore struct {
 	db *memdb.MemDB
