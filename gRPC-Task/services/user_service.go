@@ -62,17 +62,47 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.User) (*pb.User, e
 }
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
-	return &pb.User{
-		UserId: req.UserId,
-	}, nil
+	user, err := s.repo.GetUser(req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userResult := &pb.User{
+		UserId:       user.UserId,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		EmailAddress: user.EmailAddress,
+	}
+
+	return userResult, nil
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
+	err := s.repo.DeleteUser(req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
 func (s *UserService) ListUsers(ctx context.Context, _ *emptypb.Empty) (*pb.UserList, error) {
-	return &pb.UserList{
-		Users: []*pb.User{},
-	}, nil
+	users, err := s.repo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	userList := &pb.UserList{}
+
+	for _, u := range users {
+		userList.Users = append(userList.Users, &pb.User{
+			UserId:       u.UserId,
+			FirstName:    u.FirstName,
+			LastName:     u.LastName,
+			EmailAddress: u.EmailAddress,
+		})
+	}
+
+	return userList, nil
 }

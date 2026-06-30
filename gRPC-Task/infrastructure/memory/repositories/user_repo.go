@@ -16,12 +16,12 @@ func NewUserRepository(store *memory.MemoryStore) *UserRepository {
 	}
 }
 
-func (r *UserRepository) CreateUser(u models.User) {
+func (r *UserRepository) CreateUser(u models.User) error {
 	txn := r.store.GetStore().Txn(true)
 	defer txn.Abort()
 
 	if err := txn.Insert("user", u); err != nil {
-		panic(err)
+		return fmt.Errorf("insert user failed: %w", err)
 	}
 
 	txn.Commit()
