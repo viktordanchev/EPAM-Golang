@@ -96,7 +96,7 @@ func (r *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 
 	it, err := txn.Get("project", "id")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var projects []models.Project

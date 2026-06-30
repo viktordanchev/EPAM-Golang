@@ -30,11 +30,10 @@ func MakeIssueCalls(ctx context.Context, client pbIssue.IssueServiceClient) {
 
 	listIssues(ctx, client)
 
-	updateIssue(ctx, client, issue1)
-
 	deleteIssue(ctx, client, issue1.IssueId)
 
 	listIssues(ctx, client)
+	updateIssue(ctx, client, issue2)
 }
 
 func createIssue(

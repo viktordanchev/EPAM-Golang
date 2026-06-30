@@ -96,7 +96,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 
 	it, err := txn.Get("user", "id")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var users []models.User

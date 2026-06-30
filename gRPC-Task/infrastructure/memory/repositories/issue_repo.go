@@ -36,7 +36,7 @@ func (r *IssueRepository) UpdateIssue(i models.Issue) error {
 
 	existing, err := txn.First("issue", "id", i.IssueId)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if existing == nil {
@@ -44,7 +44,7 @@ func (r *IssueRepository) UpdateIssue(i models.Issue) error {
 	}
 
 	if err := txn.Insert("issue", i); err != nil {
-		panic(err)
+		return err
 	}
 
 	txn.Commit()
@@ -75,7 +75,7 @@ func (r *IssueRepository) DeleteIssue(issueID string) error {
 
 	issue, err := txn.First("issue", "id", issueID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if issue == nil {
@@ -92,7 +92,7 @@ func (r *IssueRepository) GetAllIssues() ([]models.Issue, error) {
 
 	it, err := txn.Get("issue", "id")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var issues []models.Issue
