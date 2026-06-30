@@ -4,21 +4,17 @@ import (
 	"log"
 	"net"
 	pbUser "server/gen/pb/user"
-	memdb "server/infrastructure/memory"
+	memorydb "server/infrastructure/memory"
 	"server/infrastructure/memory/repositories"
 	"server/services"
 
+	"github.com/hashicorp/go-memdb"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	db, err := memdb.CreateMemoryStore()
-	if err != nil {
-		panic(err)
-	}
-
-	memdb := db.GetStore()
-	userRepo := repositories.NewUserRepository(memdb)
+	db := createMemeryDb()
+	userRepo := repositories.NewUserRepository(db)
 
 	userService := services.NewUserService(userRepo)
 
@@ -35,4 +31,15 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func createMemeryDb() *memdb.MemDB {
+	db, err := memorydb.CreateMemoryStore()
+	if err != nil {
+		panic(err)
+	}
+
+	memdb := db.GetStore()
+
+	return memdb
 }

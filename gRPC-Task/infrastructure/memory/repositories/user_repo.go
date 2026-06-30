@@ -56,7 +56,6 @@ func (r *UserRepository) GetUser(userID string) (models.User, error) {
 	defer txn.Abort()
 
 	raw, err := txn.First("user", "id", userID)
-	fmt.Println("ETO GO:", raw)
 	if err != nil {
 		return models.User{}, fmt.Errorf("Receive user failed: %w", err)
 	}
@@ -71,23 +70,27 @@ func (r *UserRepository) GetUser(userID string) (models.User, error) {
 }
 
 func (r *UserRepository) DeleteUser(userID string) error {
-	txn := r.store.Txn(false)
+	txn := r.store.Txn(true)
 	defer txn.Abort()
 
 	user, err := txn.First("user", "id", userID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if user == nil {
-		return fmt.Errorf("User not found")
+		return fmt.Errorf("user not found")
 	}
 
-	txn.Delete("user", user)
+	if err := txn.Delete("user", user); err != nil {
+		return err
+	}
+
+	txn.Commit()
 	return nil
 }
 
-func (r *UserRepository) GetAllUsers() ([]*models.User, error) {
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	txn := r.store.Txn(false)
 	defer txn.Abort()
 
@@ -96,10 +99,10 @@ func (r *UserRepository) GetAllUsers() ([]*models.User, error) {
 		panic(err)
 	}
 
-	var users []*models.User
+	var users []models.User
 
 	for obj := it.Next(); obj != nil; obj = it.Next() {
-		users = append(users, obj.(*models.User))
+		users = append(users, obj.(models.User))
 	}
 
 	return users, nil

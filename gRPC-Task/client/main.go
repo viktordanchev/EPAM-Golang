@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func main() {
@@ -35,6 +36,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	userRes2, err := userClient.CreateUser(ctx, &pbUser.User{
+		FirstName:    "Viktor",
+		LastName:     "Danchev",
+		EmailAddress: "viktor@example.com",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	user, err := userClient.GetUser(ctx, &pbUser.GetUserRequest{
 		UserId: userRes.UserId,
 	})
@@ -42,5 +52,35 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(user)
+	user2, err := userClient.GetUser(ctx, &pbUser.GetUserRequest{
+		UserId: userRes2.UserId,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	users, err := userClient.ListUsers(ctx, &emptypb.Empty{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("CREATED:", user)
+	fmt.Println("CREATED:", user2)
+	fmt.Println("LIST:", users)
+
+	deleted, err := userClient.DeleteUser(ctx, &pbUser.DeleteUserRequest{
+		UserId: userRes.UserId,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("DELETED:", deleted)
+
+	users2, err := userClient.ListUsers(ctx, &emptypb.Empty{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("LIST:", users2)
 }
