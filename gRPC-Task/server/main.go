@@ -3,51 +3,115 @@ package main
 import (
 	"log"
 	"net"
+
 	pbIssue "server/gen/pb/issue"
 	pbProject "server/gen/pb/project"
 	pbUser "server/gen/pb/user"
+	"server/repository"
+
 	memorydb "server/infrastructure/memory"
-	"server/infrastructure/memory/repository"
-	"server/services"
+	memoryRepository "server/infrastructure/memory/repository"
+	"server/service"
 
 	"github.com/hashicorp/go-memdb"
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 )
 
 func main() {
-	db := createMemeryDb()
-	userRepo := repository.NewUserRepository(db)
-	projectRepo := repository.NewProjectRepository(db)
-	issueRepo := repository.NewIssueRepository(db)
-
-	userService := services.NewUserService(userRepo)
-	projectService := services.NewProjectService(projectRepo)
-	issueService := services.NewIssueService(issueRepo)
+	server := createMemoryServer()
+	// server := createPostgresServer()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	s := grpc.NewServer()
-	pbUser.RegisterUserServiceServer(s, userService)
-	pbProject.RegisterProjectServiceServer(s, projectService)
-	pbIssue.RegisterIssueServiceServer(s, issueService)
 
 	log.Println("gRPC server running on :50051")
 
-	if err := s.Serve(lis); err != nil {
+	if err := server.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func createMemeryDb() *memdb.MemDB {
+// ---------------------------------------------------------
+// Memory
+// ---------------------------------------------------------
+
+func createMemoryServer() *grpc.Server {
+	db := createMemoryDb()
+
+	userRepo := memoryRepository.NewUserRepository(db)
+	projectRepo := memoryRepository.NewProjectRepository(db)
+	issueRepo := memoryRepository.NewIssueRepository(db)
+
+	return createServer(
+		userRepo,
+		projectRepo,
+		issueRepo,
+	)
+}
+
+func createMemoryDb() *memdb.MemDB {
 	db, err := memorydb.CreateMemoryStore()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	memdb := db.GetStore()
+	return db.GetStore()
+}
 
-	return memdb
+// ---------------------------------------------------------
+// PostgreSQL
+// ---------------------------------------------------------
+
+/*func createPostgresServer() *grpc.Server {
+	db := createPostgresDb()
+
+	userRepo := postgresRepository.NewUserRepository(db)
+	projectRepo := postgresRepository.NewProjectRepository(db)
+	issueRepo := postgresRepository.NewIssueRepository(db)
+
+	return createServer(
+		userRepo,
+		projectRepo,
+		issueRepo,
+	)
+}*/
+
+func createPostgresDb() *gorm.DB {
+	// Тук ще си сложиш твоята PostgreSQL/GORM конфигурация.
+	//
+	// Пример:
+	//
+	// db, err := postgres.NewPostgres(...)
+	// if err != nil {
+	//     log.Fatal(err)
+	// }
+	//
+	// return db
+
+	panic("PostgreSQL database is not configured yet")
+}
+
+// ---------------------------------------------------------
+// Dependency Injection
+// ---------------------------------------------------------
+
+func createServer(
+	userRepo repository.UserRepository,
+	projectRepo repository.ProjectRepository,
+	issueRepo repository.IssueRepository,
+) *grpc.Server {
+	userService := service.NewUserService(userRepo)
+	projectService := service.NewProjectService(projectRepo)
+	issueService := service.NewIssueService(issueRepo)
+
+	s := grpc.NewServer()
+
+	pbUser.RegisterUserServiceServer(s, userService)
+	pbProject.RegisterProjectServiceServer(s, projectService)
+	pbIssue.RegisterIssueServiceServer(s, issueService)
+
+	return s
 }
