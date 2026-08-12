@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	pb "server/gen/pb/user"
-	"server/infrastructure/memory/models"
-	"server/infrastructure/memory/repositories"
+	"server/infrastructure/models"
+	"server/repository"
 	"server/utils"
 
 	"google.golang.org/grpc/codes"
@@ -14,10 +14,10 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
-	repo *repositories.UserRepository
+	repo repository.UserRepository
 }
 
-func NewUserService(repo *repositories.UserRepository) *UserService {
+func NewUserService(repo repository.UserRepository) *UserService {
 	return &UserService{
 		repo: repo,
 	}
@@ -28,7 +28,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.User) (*pb.User, e
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
 	}
 
-	userModel := models.User{
+	userModel := &models.User{
 		UserId:       utils.GenerateId(),
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
@@ -55,7 +55,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.User) (*pb.User, e
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
 	}
 
-	userModel := models.User{
+	userModel := &models.User{
 		UserId:       req.UserId,
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,

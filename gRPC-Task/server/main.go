@@ -7,7 +7,7 @@ import (
 	pbProject "server/gen/pb/project"
 	pbUser "server/gen/pb/user"
 	memorydb "server/infrastructure/memory"
-	"server/infrastructure/memory/repositories"
+	"server/infrastructure/memory/repository"
 	"server/services"
 
 	"github.com/hashicorp/go-memdb"
@@ -16,9 +16,9 @@ import (
 
 func main() {
 	db := createMemeryDb()
-	userRepo := repositories.NewUserRepository(db)
-	projectRepo := repositories.NewProjectRepository(db)
-	issueRepo := repositories.NewIssueRepository(db)
+	userRepo := repository.NewUserRepository(db)
+	projectRepo := repository.NewProjectRepository(db)
+	issueRepo := repository.NewIssueRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	projectService := services.NewProjectService(projectRepo)

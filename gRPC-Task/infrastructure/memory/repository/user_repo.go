@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import (
 	"fmt"
-	"server/infrastructure/memory/models"
+	"server/infrastructure/models"
 
 	"github.com/hashicorp/go-memdb"
 )
@@ -17,7 +17,7 @@ func NewUserRepository(store *memdb.MemDB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) CreateUser(u models.User) error {
+func (r *UserRepository) CreateUser(u *models.User) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -30,7 +30,7 @@ func (r *UserRepository) CreateUser(u models.User) error {
 	return nil
 }
 
-func (r *UserRepository) UpdateUser(u models.User) error {
+func (r *UserRepository) UpdateUser(u *models.User) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -51,20 +51,20 @@ func (r *UserRepository) UpdateUser(u models.User) error {
 	return nil
 }
 
-func (r *UserRepository) GetUser(userID string) (models.User, error) {
+func (r *UserRepository) GetUser(userID string) (*models.User, error) {
 	txn := r.store.Txn(false)
 	defer txn.Abort()
 
 	raw, err := txn.First("user", "id", userID)
 	if err != nil {
-		return models.User{}, fmt.Errorf("Receive user failed: %w", err)
+		return nil, fmt.Errorf("Receive user failed: %w", err)
 	}
 
 	if raw == nil {
-		return models.User{}, fmt.Errorf("User not found")
+		return nil, fmt.Errorf("User not found")
 	}
 
-	user := raw.(models.User)
+	user := raw.(*models.User)
 
 	return user, nil
 }
@@ -102,7 +102,8 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 
 	for obj := it.Next(); obj != nil; obj = it.Next() {
-		users = append(users, obj.(models.User))
+		user := obj.(*models.User)
+		users = append(users, *user)
 	}
 
 	return users, nil

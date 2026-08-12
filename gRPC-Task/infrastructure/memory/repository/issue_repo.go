@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import (
 	"fmt"
-	"server/infrastructure/memory/models"
+	"server/infrastructure/models"
 
 	"github.com/hashicorp/go-memdb"
 )
@@ -17,7 +17,7 @@ func NewIssueRepository(store *memdb.MemDB) *IssueRepository {
 	}
 }
 
-func (r *IssueRepository) CreateIssue(i models.Issue) error {
+func (r *IssueRepository) CreateIssue(i *models.Issue) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -30,7 +30,7 @@ func (r *IssueRepository) CreateIssue(i models.Issue) error {
 	return nil
 }
 
-func (r *IssueRepository) UpdateIssue(i models.Issue) error {
+func (r *IssueRepository) UpdateIssue(i *models.Issue) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -51,20 +51,20 @@ func (r *IssueRepository) UpdateIssue(i models.Issue) error {
 	return nil
 }
 
-func (r *IssueRepository) GetIssue(issueID string) (models.Issue, error) {
+func (r *IssueRepository) GetIssue(issueID string) (*models.Issue, error) {
 	txn := r.store.Txn(false)
 	defer txn.Abort()
 
 	raw, err := txn.First("issue", "id", issueID)
 	if err != nil {
-		return models.Issue{}, fmt.Errorf("Receive issue failed: %w", err)
+		return nil, fmt.Errorf("Receive issue failed: %w", err)
 	}
 
 	if raw == nil {
-		return models.Issue{}, fmt.Errorf("Issue not found")
+		return nil, fmt.Errorf("Issue not found")
 	}
 
-	issue := raw.(models.Issue)
+	issue := raw.(*models.Issue)
 
 	return issue, nil
 }
@@ -98,7 +98,8 @@ func (r *IssueRepository) GetAllIssues() ([]models.Issue, error) {
 	var issues []models.Issue
 
 	for obj := it.Next(); obj != nil; obj = it.Next() {
-		issues = append(issues, obj.(models.Issue))
+		issue := obj.(*models.Issue)
+		issues = append(issues, *issue)
 	}
 
 	return issues, nil

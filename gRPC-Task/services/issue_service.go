@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	pb "server/gen/pb/issue"
-	"server/infrastructure/memory/models"
-	"server/infrastructure/memory/repositories"
+	"server/infrastructure/models"
+	"server/repository"
 	"server/utils"
 	"time"
 
@@ -16,10 +16,10 @@ import (
 
 type IssueService struct {
 	pb.UnimplementedIssueServiceServer
-	repo *repositories.IssueRepository
+	repo repository.IssueRepository
 }
 
-func NewIssueService(repo *repositories.IssueRepository) *IssueService {
+func NewIssueService(repo repository.IssueRepository) *IssueService {
 	return &IssueService{
 		repo: repo,
 	}
@@ -31,7 +31,7 @@ func (s *IssueService) CreateIssue(ctx context.Context, req *pb.Issue) (*pb.Issu
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
 	}
 
-	issueModel := models.Issue{
+	issueModel := &models.Issue{
 		IssueId:        utils.GenerateId(),
 		CreateDate:     time.Now(),
 		ModifyDate:     time.Now(),
@@ -105,7 +105,7 @@ func (s *IssueService) UpdateIssue(ctx context.Context, req *pb.Issue) (*pb.Issu
 		return nil, status.Error(codes.InvalidArgument, "Invalid status")
 	}
 
-	issueModel := models.Issue{
+	issueModel := &models.Issue{
 		IssueId:        req.IssueId,
 		ModifyDate:     time.Now(),
 		Summary:        req.Summary,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	pb "server/gen/pb/project"
-	"server/infrastructure/memory/models"
-	"server/infrastructure/memory/repositories"
+	"server/infrastructure/models"
+	"server/repository"
 	"server/utils"
 
 	"google.golang.org/grpc/codes"
@@ -15,10 +15,10 @@ import (
 
 type ProjectService struct {
 	pb.UnimplementedProjectServiceServer
-	repo *repositories.ProjectRepository
+	repo repository.ProjectRepository
 }
 
-func NewProjectService(repo *repositories.ProjectRepository) *ProjectService {
+func NewProjectService(repo repository.ProjectRepository) *ProjectService {
 	return &ProjectService{
 		repo: repo,
 	}
@@ -29,7 +29,7 @@ func (s *ProjectService) CreateProject(ctx context.Context, req *pb.Project) (*p
 		return nil, errors.New("Missing fields")
 	}
 
-	porjectModel := models.Project{
+	porjectModel := &models.Project{
 		ProjectId:   utils.GenerateId(),
 		Name:        req.Name,
 		Description: req.Description,
@@ -54,7 +54,7 @@ func (s *ProjectService) UpdateProject(ctx context.Context, req *pb.Project) (*p
 		return nil, status.Error(codes.InvalidArgument, "Missing fields")
 	}
 
-	porjectModel := models.Project{
+	porjectModel := &models.Project{
 		ProjectId:   req.ProjectId,
 		Name:        req.Name,
 		Description: req.Description,

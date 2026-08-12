@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import (
 	"fmt"
-	"server/infrastructure/memory/models"
+	"server/infrastructure/models"
 
 	"github.com/hashicorp/go-memdb"
 )
@@ -17,7 +17,7 @@ func NewProjectRepository(store *memdb.MemDB) *ProjectRepository {
 	}
 }
 
-func (r *ProjectRepository) CreateProject(p models.Project) error {
+func (r *ProjectRepository) CreateProject(p *models.Project) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -30,7 +30,7 @@ func (r *ProjectRepository) CreateProject(p models.Project) error {
 	return nil
 }
 
-func (r *ProjectRepository) UpdateProject(p models.Project) error {
+func (r *ProjectRepository) UpdateProject(p *models.Project) error {
 	txn := r.store.Txn(true)
 	defer txn.Abort()
 
@@ -51,20 +51,20 @@ func (r *ProjectRepository) UpdateProject(p models.Project) error {
 	return nil
 }
 
-func (r *ProjectRepository) GetProject(projectID string) (models.Project, error) {
+func (r *ProjectRepository) GetProject(projectID string) (*models.Project, error) {
 	txn := r.store.Txn(false)
 	defer txn.Abort()
 
 	raw, err := txn.First("project", "id", projectID)
 	if err != nil {
-		return models.Project{}, fmt.Errorf("Receive project failed: %w", err)
+		return nil, fmt.Errorf("Receive project failed: %w", err)
 	}
 
 	if raw == nil {
-		return models.Project{}, fmt.Errorf("Project not found")
+		return nil, fmt.Errorf("Project not found")
 	}
 
-	project := raw.(models.Project)
+	project := raw.(*models.Project)
 
 	return project, nil
 }
@@ -102,7 +102,8 @@ func (r *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 	var projects []models.Project
 
 	for obj := it.Next(); obj != nil; obj = it.Next() {
-		projects = append(projects, obj.(models.Project))
+		project := obj.(*models.Project)
+		projects = append(projects, *project)
 	}
 
 	return projects, nil
