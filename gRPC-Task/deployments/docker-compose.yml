@@ -1,41 +1,18 @@
-version: "3.9"
+version: "3.8"
 
 name: gRPC-Task
 services:
   postgres:
-    image: postgres:16
-    container_name: gRPC-database
-    restart: always
-
+    image: postgres
+    container_name: grpc-task_database_postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: grpc-server
-
+      POSTGRES_DB: grpc-task
     ports:
       - "5432:5432"
-
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  grpc-server:
-    container_name: gRPC-server
-    build: .
-    depends_on:
-      - postgres
-
-    volumes:
-      - .:/app
-
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: admin
-      DB_PASSWORD: 123456
-      DB_NAME: grpc-server
-
-    ports:
-      - "50051:50051"
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:

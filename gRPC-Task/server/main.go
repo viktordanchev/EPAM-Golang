@@ -9,6 +9,8 @@ import (
 	pbUser "server/gen/pb/user"
 	"server/repository"
 
+	postgresdb "server/infrastructure/database"
+	postgresRepository "server/infrastructure/database/repository"
 	memorydb "server/infrastructure/memory"
 	memoryRepository "server/infrastructure/memory/repository"
 	"server/service"
@@ -19,8 +21,8 @@ import (
 )
 
 func main() {
-	server := createMemoryServer()
-	// server := createPostgresServer()
+	// server := createMemoryServer()
+	server := createPostgresServer()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -65,7 +67,7 @@ func createMemoryDb() *memdb.MemDB {
 // PostgreSQL
 // ---------------------------------------------------------
 
-/*func createPostgresServer() *grpc.Server {
+func createPostgresServer() *grpc.Server {
 	db := createPostgresDb()
 
 	userRepo := postgresRepository.NewUserRepository(db)
@@ -77,21 +79,19 @@ func createMemoryDb() *memdb.MemDB {
 		projectRepo,
 		issueRepo,
 	)
-}*/
+}
 
 func createPostgresDb() *gorm.DB {
-	// Тук ще си сложиш твоята PostgreSQL/GORM конфигурация.
-	//
-	// Пример:
-	//
-	// db, err := postgres.NewPostgres(...)
-	// if err != nil {
-	//     log.Fatal(err)
-	// }
-	//
-	// return db
+	db, err := postgresdb.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	panic("PostgreSQL database is not configured yet")
+	if err := postgresdb.MigrateTables(db); err != nil {
+		log.Fatal(err)
+	}
+
+	return db
 }
 
 // ---------------------------------------------------------

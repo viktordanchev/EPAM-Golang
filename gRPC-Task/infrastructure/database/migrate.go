@@ -1,7 +1,7 @@
 package database
 
 import (
-	"server/infrastructure/database/models"
+	"server/infrastructure/models"
 
 	"gorm.io/gorm"
 )

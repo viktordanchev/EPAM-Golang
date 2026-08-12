@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"server/infrastructure/database/models"
+	"server/infrastructure/models"
 
 	"gorm.io/gorm"
 )
@@ -18,7 +18,7 @@ func NewIssueRepository(db *gorm.DB) *IssueRepository {
 	}
 }
 
-func (r *IssueRepository) CreateIssue(issue models.Issue) error {
+func (r *IssueRepository) CreateIssue(issue *models.Issue) error {
 	if err := r.db.Create(&issue).Error; err != nil {
 		return fmt.Errorf("create issue failed: %w", err)
 	}
@@ -26,10 +26,10 @@ func (r *IssueRepository) CreateIssue(issue models.Issue) error {
 	return nil
 }
 
-func (r *IssueRepository) UpdateIssue(issue models.Issue) error {
+func (r *IssueRepository) UpdateIssue(issue *models.Issue) error {
 	result := r.db.
 		Model(&models.Issue{}).
-		Where("issue_id = ?", issue.ID).
+		Where("issue_id = ?", issue.IssueId).
 		Updates(&issue)
 
 	if result.Error != nil {

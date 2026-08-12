@@ -42,7 +42,7 @@ const (
 )
 
 type Issue struct {
-	IssueId    string
+	IssueId    string `gorm:"column:issue_id;primaryKey"`
 	CreateDate time.Time
 	ModifyDate time.Time
 
